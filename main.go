@@ -16,6 +16,9 @@ import (
 // 7: last i plan to use for select loop to listen to all the channels and this conccurrency pattern automatically
 //    checks which channel has the output and we can read from it Hence finding the file faster
 
+// main global channel to collect any results from all goroutines
+var ResultChannel = make(chan string)
+
 func searchFiles(address string, toFind string) {
 	entries, err := os.ReadDir(address)
 	if err != nil {
@@ -25,6 +28,7 @@ func searchFiles(address string, toFind string) {
 		fullPath := filepath.Join(address, entry.Name())
 		if strings.Contains(strings.ToLower(entry.Name()), strings.ToLower(toFind)) {
 			fmt.Println("Found:", fullPath)
+			ResultChannel <- fullPath
 		}
 		if entry.IsDir() {
 			go searchFiles(fullPath, toFind)
@@ -39,5 +43,9 @@ func main() {
 	}
 	dir := os.Args[1]
 	query := os.Args[2]
-	searchFiles(dir, query)
+	go searchFiles(dir, query)
+
+	result := <-ResultChannel
+	fmt.Println("Found:", result)
+	close(ResultChannel)
 }
