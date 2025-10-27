@@ -2,46 +2,42 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
-	"os"
-	//"errors"
 )
+
 // 1: first we will make a function to search files
+// 2: initially i have made a function that takes address and the thing to search and then searches it recursively 
+// 3: now i have to add concurrency in it to make it more faster
+// 4: for concurrency we will use goroutines and channels
+// 5: first my plan is to more than one goroutine to search in different subdirectories 
+// 6: each goroutine will have its own channel to send the results(if found only)
+// 7: last i plan to use for select loop to listen to all the channels and this conccurrency pattern automatically
+//    checks which channel has the output and we can read from it Hence finding the file faster
 
-func searchFiles(address string, toFind string) bool {
-	found := false
-	err := filepath.Walk(address, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
-		name := strings.ToLower(info.Name())
-		query := strings.ToLower(toFind)
-		if strings.Contains(name, query) {
-			fmt.Println("Found:", path)
-			found = true
-		}
-		return nil
-	})
+func searchFiles(address string, toFind string) {
+	entries, err := os.ReadDir(address)
 	if err != nil {
-		fmt.Println("Error:", err)
+		return
 	}
-	return found
+	for _, entry := range entries {
+		fullPath := filepath.Join(address, entry.Name())
+		if strings.Contains(strings.ToLower(entry.Name()), strings.ToLower(toFind)) {
+			fmt.Println("Found:", fullPath)
+		}
+		if entry.IsDir() {
+			go searchFiles(fullPath, toFind)
+		}
+	}
 }
-
 
 func main() {
 	if len(os.Args) < 3 {
 		fmt.Println("Usage: go run main.go <directory> <query>")
 		return
 	}
-
 	dir := os.Args[1]
 	query := os.Args[2]
-
-	if searchFiles(dir, query) {
-		fmt.Println("File found!")
-	} else {
-		fmt.Println("File not found.")
-	}
+	searchFiles(dir, query)
 }
