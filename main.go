@@ -41,11 +41,16 @@ func main() {
 		fmt.Println("Usage: go run main.go <directory> <query>")
 		return
 	}
+
 	dir := os.Args[1]
 	query := os.Args[2]
-	go searchFiles(dir, query)
+
+	fmt.Println("Indexing files...")
+	IndexFiles(dir)
+	fmt.Println("Indexing complete!")
+
+	go SearchFromIndex(query)
 
 	result := <-ResultChannel
-	fmt.Println("Found:", result)
-	close(ResultChannel)
+	fmt.Println("Result:", result)
 }
