@@ -51,6 +51,6 @@ func main() {
 
 	go SearchFromIndex(query)
 
-	result := <-ResultChannel
+	result := <-IndexResultChannel
 	fmt.Println("Result:", result)
 }

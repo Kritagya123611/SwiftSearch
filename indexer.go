@@ -9,7 +9,9 @@ import (
 
 var fileIndex = make(map[string]string)
 
-func IndexFiles(root string) {
+var IndexResultChannel = make(chan string)
+
+func IndexFiles(root string) { 
 	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
@@ -23,7 +25,7 @@ func SearchFromIndex(toFind string) {
 	toFind = strings.ToLower(toFind)
 	if path, exists := fileIndex[toFind]; exists {
 		fmt.Println("Found in index:", path)
-		ResultChannel <- path
+		IndexResultChannel <- path
 	} else {
 		fmt.Println("Not found in index.")
 	}
