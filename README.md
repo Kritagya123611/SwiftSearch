@@ -17,9 +17,55 @@ Perfect for developers, sysadmins, and anyone tired of slow searches! ⚙️🔥
 
 ---
 
+## ⚙️ Concurrency Design
+
+SwiftSearch is built with **Go’s powerful concurrency model**:
+
+1) Multiple directory walkers run **in parallel** using Goroutines  
+2) As soon as a match is found, it's pushed to the user through a **Result Channel**  
+3) No need to wait for the full scan — results appear **streamingly in real-time**
+
 ## 🛠️ Installation
 
 SwiftSearch requires **Go 1.19+**.
+
+This architecture drastically reduces search latency — especially in **large & deep directory trees**.
+
+---
+
+## 🧬 How It Works
+
+1️) **Concurrent Directory Scan**  
+Recursive + parallel traversal using Goroutines
+
+2️) **Index Phase**  
+Creates a fast lookup structure:  
+`word/filename → list of file paths`
+
+3️) **Channel-based Query Result Streaming**  
+Matches are sent instantly without blocking
+
+4️) **Smart Output**  
+Collects results from channels & prints them as soon as found
+
+> ⏱️ Initial indexing may take a few seconds for large projects —  
+> but subsequent searches become **instant and scalable**!
+
+---
+
+##  Technologies / Concepts Used
+
+| Concept | Purpose |
+|--------|---------|
+| **Goroutines** | Parallel file scanning |
+| **Channels** | Async result passing |
+| **Inverted Index** | Instant search lookups |
+| **Filesystem Walkers** | Efficient directory traversal |
+| **Content Tokenization** | Text search inside files |
+| **Concurrency Safety** | Fast, lock-free in-memory structure |
+
+---
+
 
 ### Quick Setup
 
@@ -38,9 +84,9 @@ bash
 Copy code
 # macOS / Linux
 sudo mv swiftsearch /usr/local/bin/
-➡️ Pre-built binaries coming soon (Releases page)
+ Pre-built binaries coming soon (Releases page)
 ```
-## 🚀 Usage
+##  Usage
 Run from terminal with a directory + search query:
 
 bash
@@ -98,21 +144,21 @@ Displays:
 
 ## 🎯 Roadmap
 
-✅ Core search engine
+ Core search engine
 
-🚧 Regex search support
+ Regex search support
 
-🚧 Ignore binary / large files
+ Ignore binary / large files
 
-🚀 Persistent local index cache
+ Persistent local index cache
 
-🧠 Fuzzy matching (Levenshtein)
+ Fuzzy matching (Levenshtein)
 
-🖥️ TUI (Terminal UI) interface
+ TUI (Terminal UI) interface
 
-🌐 Multi-threaded file parsing
+ Multi-threaded file parsing
 
-🔍 Ranked search scoring
+ Ranked search scoring
 
 ## 🤝 Contributing
 PRs are welcome!
