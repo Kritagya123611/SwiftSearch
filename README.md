@@ -1,5 +1,7 @@
 # ⚡ SwiftSearch
 
+![Go](https://img.shields.io/badge/Go-Concurrent-blue?logo=go)
+
 SwiftSearch is a blazing-fast **Command Line Search Tool** built with Go.  
 It recursively scans directories, builds an **inverted index**, and instantly finds files matching your query — both in **file names and file contents**.
 
