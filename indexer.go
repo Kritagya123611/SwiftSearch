@@ -69,4 +69,6 @@ func SearchFromIndex(toFind string) {
 	} else {
 		fmt.Println("Not found in index.")
 	}
+	//signal completion
+	//IndexResultChannel <- ""
 }
