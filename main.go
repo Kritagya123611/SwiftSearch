@@ -48,7 +48,7 @@ func main() {
 	fmt.Println("Indexing files...")
 	IndexFiles(dir)
 	fmt.Println("Indexing complete!")
-	fmt.Println("testing error"
+	fmt.Println("testing error")
 	go SearchFromIndex(query)
 
 	result := <-IndexResultChannel
