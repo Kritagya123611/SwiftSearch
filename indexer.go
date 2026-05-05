@@ -1,3 +1,4 @@
+//indexer.go
 package main
 
 import (
@@ -68,7 +69,6 @@ func SearchFromIndex(toFind string) {
 		IndexResultChannel <- path
 	} else {
 		fmt.Println("Not found in index.")
+		IndexResultChannel <- "" 
 	}
-	//signal completion
-	//IndexResultChannel <- ""
 }

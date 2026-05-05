@@ -19,16 +19,20 @@ func HandleCLI() {
 		fmt.Println("Indexing:", *dirCmd)
 		IndexFiles(*dirCmd)
 		SaveIndex()
-		fmt.Println("✅ Index updated.")
+		fmt.Println("Index updated.")
 		return
 	}
 
 	if *searchCmd != "" {
 		fmt.Println("Searching:", *searchCmd)
-		SearchFromIndex(*searchCmd)
-		for result := range IndexResultChannel {
-			fmt.Println("🔹", result)
-		}
+
+		// run search in goroutine (since it writes to channel)
+		go SearchFromIndex(*searchCmd)
+
+		// receive ONE result
+		result := <-IndexResultChannel
+		fmt.Println("🔹", result)
+
 		return
 	}
 
