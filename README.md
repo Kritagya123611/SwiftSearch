@@ -1,183 +1,96 @@
-# ⚡ SwiftSearch
+# SwiftSearch
 
-![Go](https://img.shields.io/badge/Go-Concurrent-blue?logo=go)
+A lightweight command-line file search tool built with Go.
 
-SwiftSearch is a blazing-fast **Command Line Search Tool** built with Go.  
-It recursively scans directories, builds an **inverted index**, and instantly finds files matching your query — both in **file names and file contents**.
+SwiftSearch recursively scans a directory tree, builds an in-memory index of filenames to their paths, persists it to a JSON file, and lets you search it later by exact filename match.
 
-Perfect for developers, sysadmins, and anyone tired of slow searches! ⚙️🔥
+## Features
 
----
+- **Fast Filename Lookup:** In-memory map for instant exact-match search
+- **Persistent Index:** Saves the index to `index.json` so you don't have to re-scan every time
+- **Zero Dependencies:** Uses only Go's standard library
+- **Single Binary:** One compiled binary, no runtime requirements
+- **Cross-Platform:** Works on Windows, macOS, and Linux
 
-##  Features
+## How It Works
 
--  **Instant Search:** Sub-second lookup via in-memory inverted index
--  **Dual-Mode Matching:** Filename + text content search
--  **Smart Indexing:** Optimized recursive scanning for large directories
--  **Lightweight CLI:** No external dependencies — single binary deployment
--  **Cross-Platform:** Works on **Windows**, **macOS**, and **Linux**
+1. **Index Phase** — Walk a directory tree with `filepath.Walk` and store `lowercase_filename → full_path` in a Go map
+2. **Persist Phase** — Serialize the map to `index.json`
+3. **Search Phase** — Load `index.json` into memory, look up the query by exact filename match
 
----
+## Installation
 
-## ⚙️ Concurrency Design
-
-SwiftSearch is built with **Go’s powerful concurrency model**:
-
-1) Multiple directory walkers run **in parallel** using Goroutines  
-2) As soon as a match is found, it's pushed to the user through a **Result Channel**  
-3) No need to wait for the full scan — results appear **streamingly in real-time**
-
-## 🛠️ Installation
-
-SwiftSearch requires **Go 1.19+**.
-
-This architecture drastically reduces search latency — especially in **large & deep directory trees**.
-
----
-
-## 🧬 How It Works
-
-1️) **Concurrent Directory Scan**  
-Recursive + parallel traversal using Goroutines
-
-2️) **Index Phase**  
-Creates a fast lookup structure:  
-`word/filename → list of file paths`
-
-3️) **Channel-based Query Result Streaming**  
-Matches are sent instantly without blocking
-
-4️) **Smart Output**  
-Collects results from channels & prints them as soon as found
-
-> ⏱️ Initial indexing may take a few seconds for large projects —  
-> but subsequent searches become **instant and scalable**!
-
----
-
-##  Technologies / Concepts Used
-
-| Concept | Purpose |
-|--------|---------|
-| **Goroutines** | Parallel file scanning |
-| **Channels** | Async result passing |
-| **Inverted Index** | Instant search lookups |
-| **Filesystem Walkers** | Efficient directory traversal |
-| **Content Tokenization** | Text search inside files |
-| **Concurrency Safety** | Fast, lock-free in-memory structure |
-
----
-
-
-### Quick Setup
+Requires Go 1.19+.
 
 ```bash
-# Clone the repository
-git clone https://github.com/<your-username>/SwiftSearch.git
-
-# Enter project directory
+git clone https://github.com/Kritagya123611/SwiftSearch.git
 cd SwiftSearch
-
-# Build the binary
 go build -o swiftsearch
-🏁 Optional: Add to PATH
-
-bash
-Copy code
-# macOS / Linux
-sudo mv swiftsearch /usr/local/bin/
- Pre-built binaries coming soon (Releases page)
 ```
-##  Usage
-Run from terminal with a directory + search query:
 
-bash
-Copy code
-./swiftsearch <directory> "<query>"
-Examples
-Basic content search
+Optional: add to PATH
 
-bash
-Copy code
-./swiftsearch ~/Documents "error handling"
-Filename only search
+```bash
+sudo mv swiftsearch /usr/local/bin/
+```
 
-bash
-Copy code
-./swiftsearch . "config.yaml" --name-only
-Case-insensitive (default)
+## Usage
 
-bash
-Copy code
-./swiftsearch src "TODO"
-🔧 CLI Flags
-Flag	Description	Default
---name-only	Search only filenames (skip content)	
---case-sensitive	Enable case-sensitive search	
---max-results N	Limit number of results	10
---help	Show help commands	-
+### Step 1 — Index a directory
 
-## Full help:
+```bash
+./swiftsearch -index -dir ~/Projects
+```
 
-bash
-Copy code
-./swiftsearch --help
-How It Works
-SwiftSearch is designed for speed + simplicity:
+This scans the directory and saves the results to `index.json`.
 
-1️) Scan Phase
-Recursive directory walker → reads files line-by-line
+### Step 2 — Search for a file
 
-2️) Index Phase
-Creates inverted index →
-word -> list of file paths
+```bash
+./swiftsearch -search "main.go"
+```
 
-3️) Query Phase
-Instant lookup, no rescanning
+This loads the saved index and finds the file by exact name.
 
-4️) Output Phase
-Displays:
-✅ Matching file paths
-✅ Line numbers
-✅ Snippet previews (WIP)
+## CLI Flags
 
-💡 Ideal for repeated searches inside the same directory
-⏱️ Example: 10–30s initial indexing → instant future queries
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-index` | Build/update the file index | `false` |
+| `-search <query>` | Search for a file by exact name | `""` |
+| `-dir <path>` | Directory to index | `"."` |
 
-## 🎯 Roadmap
+## Example
 
- Core search engine
+```bash
+# Build the tool
+go build -o swiftsearch
 
- Regex search support
+# Index your current project
+./swiftsearch -index -dir .
 
- Ignore binary / large files
+# Search for a file
+./swiftsearch -search "cli.go"
+```
 
- Persistent local index cache
+## Limitations
 
- Fuzzy matching (Levenshtein)
+- **Exact match only** — searching for `"cli"` will not find `"cli.go"`
+- **Filename collisions** — if two files have the same name, only the last one found is stored
+- **No content search** — only searches filenames, not file contents
+- **No incremental indexing** — re-walks the entire directory tree each time
+- **No filtering** — indexes everything including `.git` internals
 
- TUI (Terminal UI) interface
+## Roadmap
 
- Multi-threaded file parsing
+- [ ] Partial/fuzzy filename matching
+- [ ] File content search
+- [ ] Skip hidden directories (`.git`, etc.)
+- [ ] Incremental indexing
+- [ ] File type filtering
+- [ ] Multiple results per search
+- [ ] Ignore binary/large files
 
- Ranked search scoring
+## License
 
-## 🤝 Contributing
-PRs are welcome!
-Focus areas include:
-
-✅ Performance improvements
-✅ File-type filtering
-✅ CI/CD & testing
-
-bash
-Copy code
-Fork → Improve → Pull Request ✅
-📜 License
-Licensed under the MIT License
-See LICENSE file for more details.
-
-⭐ If SwiftSearch saves you time — consider giving the repo a star!
-Questions? Open an issue or reach out on X/Twitter: @yourhandle
-
-Happy searching! 🕵️‍♂️⚡
+MIT
